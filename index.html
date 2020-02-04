@@ -16,18 +16,47 @@ var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHe
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
+renderer.shadowMapEnabled = true;
 document.body.appendChild( renderer.domElement );
 
-var geometry = new THREE.BoxGeometry();
-var material = new THREE.MeshBasicMaterial( { color: 0xbbaaef } );
+var geometry = new THREE.BoxGeometry( 6, 4, 6);
+var material = new THREE.MeshLambertMaterial( { color: 0xed0e8c } );
 var cube = new THREE.Mesh( geometry, material );
+cube.castShadow = true;
 scene.add ( cube );
 
-camera.position.z = 5;
+camera.position.x = 15;
+ camera.position.y = 16;
+ camera.position.z = 13;
 
+camera.lookAt(scene.position);
+
+var planeGeometry = new THREE.PlaneGeometry(20, 20);
+var planeMaterial = new THREE.MeshLambertMaterial ( { color: 0xa4c4fc });
+
+var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.receiveShadow = true;
+scene.add(plane);
+
+plane.rotation.x = -0.5 * Math.PI;
+plane.position.y = -2;
+
+
+var spotLight = new THREE.SpotLight(0xf7ebc3);
+spotLight.position.set(10, 20, 20);
+
+spotLight.castShadow = true;
+
+scene.add(spotLight);
+
+/*
+camera.position.z = 25;
+
+*/
 renderer.render( scene, camera );
 
 
+/*
 function animate() {
   requestAnimationFrame( animate );
 
@@ -38,6 +67,8 @@ function animate() {
 }
 
 animate();
+*/
+render();
 
 </script>
 
