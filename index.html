@@ -6,72 +6,112 @@
 
 </head>
 
-<body>
+
 <script src=js/three.js/build/three.js></script>
+<script src=js/three.js/build/dat.gui.min.js></script>
+
 
 <script>
 
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
+var renderer;
+var scene;
+var camera;
+var control;
 
-var renderer = new THREE.WebGLRenderer();
+function init() {
+
+scene = new THREE.Scene();
+camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+renderer = new THREE.WebGLRenderer();
+renderer.setClearColor(0x000000, 1.0);
 renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.shadowMapEnabled = true;
-document.body.appendChild( renderer.domElement );
-
-var geometry = new THREE.BoxGeometry( 6, 4, 6);
-var material = new THREE.MeshLambertMaterial( { color: 0xed0e8c } );
-var cube = new THREE.Mesh( geometry, material );
-cube.castShadow = true;
-scene.add ( cube );
-
-camera.position.x = 15;
- camera.position.y = 16;
- camera.position.z = 13;
-
-camera.lookAt(scene.position);
+renderer.shadowMap.enabled = true;
 
 var planeGeometry = new THREE.PlaneGeometry(20, 20);
 var planeMaterial = new THREE.MeshLambertMaterial ( { color: 0xa4c4fc });
-
 var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.receiveShadow = true;
-scene.add(plane);
 
 plane.rotation.x = -0.5 * Math.PI;
+plane.position.x = 0;
 plane.position.y = -2;
+plane.position.z = 0;
 
+scene.add(plane);
+
+
+var cubeGeometry = new THREE.BoxGeometry( 6, 4, 6);
+var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xed0e8c, transparent:true, opacity:0.6  } );
+var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
+cube.name='cube';
+cube.castShadow = true;
+
+scene.add ( cube );
+
+camera.position.x = 15;
+camera.position.y = 16;
+camera.position.z = 13;
+camera.lookAt(scene.position);
 
 var spotLight = new THREE.SpotLight(0xf7ebc3);
 spotLight.position.set(10, 20, 20);
-
+spotLight.shadow.camera.near = 20;
+spotLight.shadow.camera.far = 50;
 spotLight.castShadow = true;
 
 scene.add(spotLight);
 
-/*
-camera.position.z = 25;
+control = new function() {
+  this.rotationSpeed = 0.005;
+  this.opacity = 0.6;
+  this.color = cubeMaterial.color.getHex();
+};
+addControlGui (control);
 
-*/
-renderer.render( scene, camera );
+document.body.appendChild(renderer.domElement);
 
-
-/*
-function animate() {
-  requestAnimationFrame( animate );
-
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-
-  renderer.render( scene, camera );
-}
-
-animate();
-*/
 render();
 
-</script>
+}
 
-</body>
+function addControlGui(controlObject) {
+  var gui = new dat.GUI();
+  gui.add(controlObject, 'rotationSpeed', -0.01, 0.01);
+  gui.add(controlObject, 'opacity', 0.1, 1);
+  gui.addColor(controlObject, 'color');
+}
+
+function render() {
+
+var rotSpeed = control.rotationSpeed;
+camera.position.x = camera.position.x * Math.cos(rotSpeed) + camera.position.z * Math.sin(rotSpeed);
+camera.position.z = camera.position.z * Math.cos(rotSpeed) - camera.position.x * Math.sin(rotSpeed);
+camera.lookAt(scene.position);
+
+scene.getObjectByName('cube').material.opacity = control.opacity;
+
+scene.getObjectByName('cube').material.color = new THREE.Color(control.color);
+
+requestAnimationFrame(render);
+renderer.render(scene, camera);
+}
+
+function handleResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+// calls the init function when the window is done loading.
+window.onload = init;
+// calls the handleResize function when the window is resized
+window.addEventListener('resize', handleResize, false);
+
+
+
+</script>
+<body></body>
+
 
 </html>
