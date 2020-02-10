@@ -7,6 +7,7 @@
 
   <script src="/build/three.js"></script>
   <script src="/build/dat.gui.min.js"></script>
+  <script src="/build/stats.min.js"></script>
 
   <script>
     // Global variables - these need to be outside of the init function as we will need to access them in other functions.
@@ -14,6 +15,7 @@
     var scene;
     var camera;
     var control;
+    var stats;
 
     // Initialises the scene, camera and objects. Called when the window is loaded by using the window.onload (line 109).
     function init() {
@@ -86,7 +88,7 @@
         this.color = cubeMaterial.color.getHex();
       })();
       addControlGui(control);
-
+      addStatsObject();
       //add the output of the renderer to the html
       document.body.appendChild(renderer.domElement);
 
@@ -101,8 +103,20 @@
       gui.addColor(controlObject, "color");
     }
 
+    function addStatsObject() {
+      stats = new Stats();
+      stats.setMode(0);
+
+      stats.domElement.style.position = "absolute";
+      stats.domElement.style.left = "0px";
+      stats.domElement.style.top = "0px";
+
+      document.body.appendChild(stats.domElement);
+    }
+
     function render() {
       var rotSpeed = control.rotationSpeed;
+
       camera.position.x =
         camera.position.x * Math.cos(rotSpeed) +
         camera.position.z * Math.sin(rotSpeed);
@@ -117,7 +131,10 @@
         control.color
       );
 
+      stats.update();
+
       requestAnimationFrame(render);
+
       renderer.render(scene, camera);
     }
 
